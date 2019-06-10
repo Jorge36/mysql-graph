@@ -17,4 +17,9 @@ Now we want to know the blue nodes that we can get from a yellow node. For examp
 
 To do this we can get the <i>Depth-first ordering</i> which means we want to see children nodes grouped immediately under their parent. For that we build a “path” column and sort by it:
 
+```
+function test() {
+  console.log("notice the blank line before this function?");
+}
+```
 
