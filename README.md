@@ -18,18 +18,35 @@ Now we want to know the blue nodes that we can get from a yellow node. For examp
 To do this we can get the <i>Depth-first ordering</i> which means we want to see children nodes grouped immediately under their parent. For that we build a “path” column and sort by it:
 
 ```
-WITH RECURSIVE blue(id, camino) AS (
+WITH RECURSIVE blue(id, paths) AS (
 		SELECT id, CAST(id AS CHAR(200)) FROM nodes WHERE color = "yellow"
 		UNION ALL
-		SELECT e.node_to, concat(b.camino, ',', e.node_to)
+		SELECT e.node_to, concat(b.paths, ',', e.node_to)
 		FROM blue b INNER JOIN edges e
 		  ON e.node_from = b.id
-		WHERE find_in_set(e.node_to, b.camino)=0
+		WHERE find_in_set(e.node_to, b.paths)=0
 )
-SELECT SUBSTRING(b.camino, 1, 1) yellow, b.id blue FROM blue b INNER JOIN nodes n
+SELECT SUBSTRING(b.paths, 1, 1) yellow, b.id blue FROM blue b INNER JOIN nodes n
 ON b.id = n.id 
 WHERE n.color = "blue" 
 GROUP BY yellow, blue
 ORDER BY yellow, blue;
 ```
 
+If you want to add a column with the number of path to reach a blue node we should modify a bit the query and it looks like this:
+
+```
+WITH RECURSIVE blue(id, paths) AS (
+		SELECT id, CAST(id AS CHAR(200)) FROM nodes WHERE color = "yellow"
+		UNION ALL
+		SELECT e.node_to, concat(b.paths, ',', e.node_to)
+		FROM blue b INNER JOIN edges e
+		  ON e.node_from = b.id
+		WHERE find_in_set(e.node_to, b.paths)=0
+)
+SELECT SUBSTRING(b.paths, 1, 1) yellow, b.id blue, COUNT(SUBSTRING(b.paths, 1, 1)) "Number of paths" FROM blue b INNER JOIN nodes n
+ON b.id = n.id 
+WHERE n.color = "blue" 
+GROUP BY yellow, blue
+ORDER BY yellow, blue;
+```
